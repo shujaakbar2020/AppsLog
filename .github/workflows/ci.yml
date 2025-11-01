@@ -92,7 +92,7 @@ jobs:
           git remote set-url origin https://${{secrets.GIT_ACTIONS_USER}}:${{secrets.GIT_ACTIONS_SECRET}}@github.com/shujaakbar2020/AppsLog-GitOps.git
           FILE=values.yaml
           yq eval ".service-app.image.tag = \"v${{ steps.release.outputs.version }}\"" -i "$FILE"
-          yq eval ".service-apI.image.tag = \"v${{ steps.release.outputs.version }}\"" -i "$FILE"
+          yq eval ".service-api.image.tag = \"v${{ steps.release.outputs.version }}\"" -i "$FILE"
           yq eval ".service-data.image.tag = \"v${{ steps.release.outputs.version }}\"" -i "$FILE"
           git add "$FILE"
           git commit -m "chore: update image tag to ${{ steps.release.outputs.version }}"
