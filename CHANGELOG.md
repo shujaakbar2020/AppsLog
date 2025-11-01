@@ -2,6 +2,10 @@
 
 <!-- version list -->
 
+## v1.0.0 (2025-11-01)
+
+- Initial Release
+
 ## v1.0.0 (2025-10-31)
 
 - Initial Release
