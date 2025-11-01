@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.1 (2025-11-01)
+
+### Bug Fixes
+
+- Resolved CI issue
+  ([`a3347a0`](https://github.com/shujaakbar2020/AppsLog/commit/a3347a0705c21f508285dd5f7a859bb4e96f8148))
+
+
 ## v1.0.0 (2025-11-01)
 
 - Initial Release
