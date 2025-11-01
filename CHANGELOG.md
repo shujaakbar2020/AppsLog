@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.1 (2025-11-01)
+
+### Bug Fixes
+
+- Updated argo app name
+  ([`d6bea49`](https://github.com/shujaakbar2020/AppsLog/commit/d6bea49f0beff9ce702883d6b0f1ecab5c0d7dd0))
+
+
 ## v1.0.1 (2025-11-01)
 
 ### Bug Fixes
