@@ -1,0 +1,6 @@
+flask
+tzlocal
+requests
+gunicorn
+flask-cors
+psycopg2-binary

@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - ECR_REPO="703671904406.dkr.ecr.us-east-2.amazonaws.com/demo"
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO
+      # - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)  # Optional: tag with short git commit hash
+      - IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
+      - echo Build started on `date`
+  build:
+    commands:
+      - echo Build the Docker image...
+      - docker build -t demo .
+      - docker tag demo:latest $ECR_REPO:latest
+      - docker tag demo:latest $ECR_REPO:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Pushing the Docker image to ECR...
+      - docker push $ECR_REPO:latest
+      - docker push $ECR_REPO:$IMAGE_TAG
+      - echo Build completed on `date`
+      - printf '[{"name":"demo","imageUri":"%s"}]' $ECR_REPO:latest > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json

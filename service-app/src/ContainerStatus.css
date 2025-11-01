@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+html {
+  position: relative;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: #324e63;
+}
+
+.wrapper {
+  width: 100%;
+  height: auto;
+  min-height: 90vh;
+  padding: 50px 20px;
+  padding-top: 100px;
+  display: flex;
+}
+
+.instance-card {
+  width: 100%;
+  min-height: 380px;
+  margin: auto;
+  box-shadow: 12px 12px 2px 1px rgba(13, 28, 39, 0.4);
+  background: #fff;
+  border-radius: 15px;
+  border-width: 1px;
+  max-width: 500px;
+  position: relative;
+  border: thin groove #9c83ff;
+}
+
+.instance-card__cnt {
+  margin-top: 35px;
+  text-align: center;
+  padding: 0 20px;
+  padding-bottom: 40px;
+  transition: all .3s;
+}
+
+.instance-card__name {
+  font-weight: 700;
+  font-size: 24px;
+  color: #6944ff;
+  margin-bottom: 15px;
+}
+
+.instance-card-inf__item {
+  padding: 10px 35px;
+  min-width: 150px;
+}
+
+.instance-card-inf__title {
+  font-weight: 700;
+  font-size: 27px;
+  color: #324e63;
+}
+
+.instance-card-inf__txt {
+  font-weight: 500;
+  margin-top: 7px;
+}
+
+.save-button {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #324e63;; /* subtle border to match container theme */
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}

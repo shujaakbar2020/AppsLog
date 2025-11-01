@@ -1,0 +1,118 @@
+  version: '3.9'  # Updated to the latest recommended version
+
+  services:
+    service-api:
+      build: 
+        context: ./service-api 
+        dockerfile: Dockerfile
+      image: service-api:latest
+      container_name: service-api
+      ports:
+        - "5000:5000"
+      restart: always
+      environment:
+        # Move sensitive variables to an .env file
+        - FLASK_ENV=production
+        - FLASK_RUN_HOST=0.0.0.0
+      env_file: 
+        - .env  # Use this file for environment variables
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:5000/health"]  # Health check endpoint
+        interval: 30s   # Time between health checks
+        timeout: 10s    # Time before health check is considered failed
+        retries: 3      # Retries before container is considered unhealthy
+        start_period: 5s  # Grace period before checks start
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "10m"
+          max-file: "3"
+      deploy:
+        resources:
+          limits:
+            cpus: "0.50"  # Limit the container to 50% of a CPU core
+            memory: "512M"  # Limit the memory to 512MB
+      depends_on:
+        - postgres
+      networks:
+        - demo-net
+      volumes:
+        - .:/service-api  # Mount the local directory to the container, adjust as needed
+
+    service-data:
+      build:
+        context: ./service-data
+        dockerfile: Dockerfile
+      image: service-data:latest
+      container_name: service-data
+      ports:
+        - "6000:6000"
+      restart: always
+      environment:
+        # Move sensitive variables to an .env file
+        - FLASK_ENV=production
+        - FLASK_RUN_HOST=0.0.0.0
+      env_file: 
+        - .env  # Use this file for environment variables
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:6000/health"]  # Health check endpoint
+        interval: 30s   # Time between health checks
+        timeout: 10s    # Time before health check is considered failed
+        retries: 3      # Retries before container is considered unhealthy
+        start_period: 5s  # Grace period before checks start
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "10m"
+          max-file: "3"
+      deploy:
+        resources:
+          limits:
+            cpus: "0.50"  # Limit the container to 50% of a CPU core
+            memory: "512M"  # Limit the memory to 512MB
+      depends_on:
+        - postgres
+      networks:
+        - demo-net
+      volumes:
+        - .:/service-data  # Mount the local directory to the container, adjust as needed
+
+    postgres:
+      image: postgres:15
+      container_name: postgres_db
+      restart: always
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      env_file: 
+        - .env  # Use this file for environment variable
+      networks:
+        - demo-net
+
+    service-app:
+      build:
+        context: ./service-app
+        dockerfile: Dockerfile
+        args:
+          REACT_APP_API_URL: "0.0.0.0:5000"
+          REACT_APP_API_URL_DATA: "0.0.0.0:6000"
+      image: service-app:latest
+      container_name: react-app
+      ports:
+        - "80:80"
+      restart: always
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:80/health"]  # Health check endpoint
+        interval: 30s   # Time between health checks
+        timeout: 10s    # Time before health check is considered failed
+        retries: 3      # Retries before container is considered unhealthy
+        start_period: 5s  # Grace period before checks start
+      networks:
+        - demo-net
+
+  volumes:
+    postgres_data:
+
+  networks:
+    demo-net:  # Custom network for better isolation
+      driver: bridge

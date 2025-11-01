@@ -1,0 +1,100 @@
+name: Release Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  semantic-release:
+    name: Release Pipeline
+    runs-on: ubuntu-latest
+    concurrency: release
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.GIT_ACTIONS_SECRET }}
+
+      # --- Build and Push Docker Image ---
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./service-api
+          file: ./service-api/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/service-api:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/service-api:v${{ steps.release.outputs.version }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./service-data
+          file: ./service-data/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/service-data:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/service-data:v${{ steps.release.outputs.version }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./service-app
+          file: ./service-app/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/service-app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/service-app:v${{ steps.release.outputs.version }}
+          provenance: false
+          build-args: |
+            APP_ENV=production
+            REACT_APP_API_URL="service-api:5000"
+            REACT_APP_API_URL_DATA="service-data:5000"
+
+      - name: Logout from Docker Hub
+        run: docker logout
+
+      - name: Checkout gitops repo
+        uses: actions/checkout@v4
+        with:
+          repository: shujaakbar2020/AppsLog-GitOps
+          token: ${{ secrets.GIT_ACTIONS_SECRET }}   # token with write permission
+          path: gitops-repo
+          fetch-depth: 0
+
+      - name: Update image tag in gitops repo (values.yaml)
+        run: |
+          git config --global user.email "shujaakbar2020@gmail.com"
+          git config --global user.name "Shuja Akbar"
+          cd /home/runner/work/AppsLog/AppsLog/gitops-repo
+          git checkout main
+          git remote show origin
+          git remote set-url origin https://${{secrets.GIT_ACTIONS_USER}}:${{secrets.GIT_ACTIONS_SECRET}}@github.com/shujaakbar2020/AppsLog-GitOps.git
+          FILE=values.yaml
+          yq eval ".service-app.image.tag = \"v${{ steps.release.outputs.version }}\"" -i "$FILE"
+          yq eval ".service-apI.image.tag = \"v${{ steps.release.outputs.version }}\"" -i "$FILE"
+          yq eval ".service-data.image.tag = \"v${{ steps.release.outputs.version }}\"" -i "$FILE"
+          git add "$FILE"
+          git commit -m "chore: update image tag to ${{ steps.release.outputs.version }}"
+          git log
+          git push origin main
